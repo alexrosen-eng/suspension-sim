@@ -1,0 +1,12 @@
+,X,Y,Z,,,
+chasLowFor,8.48528732,7.133426973,13.92072476,,staticCamber,-5
+chasLowAft,-1.17908424,7.142253944,13.94144309,,staticToe,0
+chasUppFor,10.77738965,8.031507553,21.34431807,,rimDiam,10
+chasUppAft,-0.23728151,7.845312212,18.75601508,,tireDiam,23
+upriLowPnt,0.32287407,23.6334542,6.911619519,,tireWidth,7
+upriUppPnt,-0.28489455,23.023364,13.85844665,,,
+chasTiePnt,10.65,7.4,17.3,,,
+upriTiePnt,6.65,22.69685456,11.5,,,
+ucaCoil,3,19.75,18.35,,,
+chasCoil,1.2,11,35,,,
+wheelCenter,0,27.5,0,,,

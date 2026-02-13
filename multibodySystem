@@ -1,0 +1,44 @@
+import numpy as np
+import csv
+from components import Body, Point, DistanceConstraint
+
+class MultibodySystem:
+
+    def __init__(self) -> None:
+        self.bodies = []
+        self.points = []
+        self.constraints = []
+
+    def add_body(self, body):
+        self.bodies.append(body)
+
+    def add_constraint(self,constraint):
+        self.bodies.append(constraint)
+
+    def residuals(self):
+        return np.array([c.residual() for c in self.constraints])
+    
+
+def build_double_wishbone(loadFile: str):
+
+    with open(loadFile, newline="") as file:
+        reader = csv.reader(file)
+        next (reader) # skip header row (X Y Z)
+
+        for row in reader:
+            name = row[0]
+
+            if row[1] and row[2] and row[3]:
+                
+
+
+
+    system = MultibodySystem()
+
+    chassis = Body("chassis")
+    fucaChassicPoint = Point([1,0,0])
+
+
+    upright = Body("upright")
+    FUCA = Body("FUCA")
+    FLCA = Body("FLCA")

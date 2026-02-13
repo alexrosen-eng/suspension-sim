@@ -1,0 +1,16 @@
+how can I get the pointcloud of the tire to behave and move as a single body through the simulation
+how will the simulation be setup in the first place??
+
+
+THE BASIC SIMULATOIN
+
+- iterate through the heave range
+- move the inboard points one step length in the z direction
+- optimize the outboard points to satisfy the length constraints between points on the same body
+- For the tire, I don't want to create constraints for every single point in the point cloud
+- I want to just look at the minimum z point, and assign a constraint for that iteration that it must be at a specific z distance
+- The center of the tire can be connected to the other points of the upright 
+- But what of the rest of the points? I can update the position, but what of the rest of the points of the tire pointcloud?
+
+- Let's just define the wheel center and a vector extending in the y direction rotated by the static camber and the static toe
+- Now 
