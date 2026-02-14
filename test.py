@@ -1,11 +1,9 @@
 from components import Body, Point, DistanceConstraint
-from multi
+from multibodySystem import MultibodySystem
 import numpy as np
 
-import os
-print(os.getcwd())
-
-FUCA_fore = Point(np.array([10,10,0]), designVariable=True)
+FUCA_fore = Point([10,10,0], designVariable=True)
+UCA_aft = Point([])
 
 chassis = Body(
     name="chassis",

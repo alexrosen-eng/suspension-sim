@@ -10,8 +10,8 @@ class Point:
     designVariable: [bool] Add the point as a design variable in optimizers
     """
 
-    def __init__(self, position: NDArray[np.float64], designVariable = False):
-        self.position = position
+    def __init__(self, position: NDArray[np.float64] | list, designVariable = False):
+        self.position = np.asarray(position, dtype=float)
         self.designVariable = designVariable
 
 
