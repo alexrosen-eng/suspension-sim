@@ -3,11 +3,16 @@ from numpy.typing import NDArray
 
 
 class Point:
+    """
+    Point creates a point to define in the simulation.
 
-    def __init__(self, position, body=False, fixed=False):
+    position: [NDArray] to define the initial position
+    designVariable: [bool] Add the point as a design variable in optimizers
+    """
+
+    def __init__(self, position: NDArray[np.float64], designVariable = False):
         self.position = position
-        self.body = body
-        self.fixed = fixed
+        self.designVariable = designVariable
 
 
 
@@ -19,7 +24,7 @@ class Body:
     Creates a body object, which is just a collection of points attached to the body
     """
 
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, points: list) -> None:
         self.name = name
         self.points = []
 

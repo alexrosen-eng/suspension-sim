@@ -19,27 +19,14 @@ class MultibodySystem:
         return np.array([c.residual() for c in self.constraints])
     
 
-def build_double_wishbone(loadFile: str):
+# def buildSystem():
+             
+#     system = MultibodySystem()
 
-    with open(loadFile, newline="") as file:
-        reader = csv.reader(file)
-        next (reader) # skip header row (X Y Z)
-
-        for row in reader:
-            name = row[0]
-
-            if row[1] and row[2] and row[3]:
-                pass
-                
+#     chassis = Body("chassis")
+#     fucaChassicPoint = Point([1,0,0])
 
 
-
-    system = MultibodySystem()
-
-    chassis = Body("chassis")
-    fucaChassicPoint = Point([1,0,0])
-
-
-    upright = Body("upright")
-    FUCA = Body("FUCA")
-    FLCA = Body("FLCA")
+#     upright = Body("upright")
+#     FUCA = Body("FUCA")
+#     FLCA = Body("FLCA")

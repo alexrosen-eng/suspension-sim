@@ -1,4 +1,4 @@
-from components.tire import Tire'
+from components import Body, 
 import numpy as np
 from scipy.optimize import least_squares
 
