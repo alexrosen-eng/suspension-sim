@@ -1,18 +1,17 @@
 import numpy as np
 import csv
-from components import Body, Point, DistanceConstraint
+from components import Body, Frame, SphericalJoint
 
 class MultibodySystem:
 
     def __init__(self) -> None:
         self.bodies = []
-        self.points = []
-        self.constraints = []
+        self.joints = []
 
-    def add_body(self, body):
-        self.bodies.append(body)
+    def add_body(self, body:list):
+        self.bodies.append([body])
 
-    def add_constraint(self,constraint):
+    def buildConstraint(self,constraint):
         self.bodies.append(constraint)
 
     def residuals(self):

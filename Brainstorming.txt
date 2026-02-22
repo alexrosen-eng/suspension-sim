@@ -14,3 +14,11 @@ THE BASIC SIMULATOIN
 
 - Let's just define the wheel center and a vector extending in the y direction rotated by the static camber and the static toe
 - Now 
+
+
+HOW WILL THE CONSTRUCTION OF THE SYSTEM BE DONE?
+
+- First define the points of the SYSTEM
+- Next define the bodies of the system, which will define the constraints between the points
+- Finally, define the system, which will be the collection of bodies
+    - From the system, the points that are shared between bodies will be an additional constraint (of 0 length/coincident)
