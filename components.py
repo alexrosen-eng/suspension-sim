@@ -4,26 +4,45 @@ import copy
 from scipy.spatial.transform import Rotation
 
 
+#%%
+# Body Class
+
+class Body:
+
+    def __init__(self, name: str, r: NDArray | list, q: NDArray | list, free=False) -> None:
+        self.name = name
+
+        self.r = np.asarray(r, dtype=float)
+        self.q = np.asarray(q, dtype=float)
+        self.free = free
+        
+        # Create a variable to store the frames associated to the body
+        self.frames = [Frame([0,0,0])] # Always set the first frame as the origin
+        self.motion = None
+
+    def addFrame(self, frame: Frame) -> None:
+        for f in frame:
+            f.body = self
+            self.frames.append(f)
+
+    def setMotion(self, motion) -> None:
+        self.motion = motion
+        self.free = False
+
+    def residual(self) -> float:
+        return np.dot(self.q, self.q) - 1
+
+#%%
+# Frame Class
 
 class Frame:
-    """
-    Point creates a frame to define in the simulation.
 
-    position: [NDArray] to define the initial position. [x,y,z] is expected with respect to the global csys
-    orientation: [NDArray] to define the orientation of the frame. Uses quaternions [q0, q1, q2, q3]
-    designVariable: [bool] Add the frame as a design variable in optimizers
-
-    """
-
-    def __init__(self, r_local, designVariable = False) -> None:
-        self.r_local = np.array(r_local, dtype=float)
+    def __init__(self, r_local: NDArray | list) -> None:
+        self.r_local = np.asarray(r_local, dtype=float)
         self.body = None
-        self.designVariable = designVariable
 
-    def globalPosition(self):
-        """
-        This function finds the global position of the frame 
-        """
+    def globalPosition(self) -> NDArray:
+
         if self.body is None:
             raise RuntimeError(
                 "Frame is not attached to a body."
@@ -32,73 +51,75 @@ class Frame:
         R = Rotation.from_quat(self.body.q).as_matrix()
         return self.body.r + R @ self.r_local
 
-
-
-class Body:
-    """
-    Docstring for Body
-
-    Creates a body object, which is just a collection of frames attached to the body
-    addFrame: adds frames to the body and associates the body to each frame
-    """
-
-    def __init__(self, name: str, r=None, q=None, fixed=False) -> None:
-        self.name = name
-
-        # define the position of the body (origin if not defined)
-        self.r = np.array(r if r is not None else [0,0,0], dtype=float)
-        # define orientation of body (aligned to origin if undefined)
-        self.q = np.array(q if q is not None else [1,0,0,0], dtype=float)
-        
-        self.fixed = fixed
-        
-        # Create a variable to store the frames associated to the body
-        self.frames = []
-        self.motion_func = None
-
-    def addFrame(self, frame: NDArray | list):
-        for f in frame:
-            f.body = self
-            self.frames.append(f)
-
-    def setMotion(self, motion_func):
-        self.motion_func = motion_func
-        self.fixed = True
-
-    
-
-
-
+#%%
+# Joint Classes
 
 class SphericalJoint:
-    def __init__(self, body1: Body, frame1: Frame, body2: Body, frame2: Frame) -> None:
-        self.body1 = body1
+
+    def __init__(self, frame1: Frame, frame2: Frame) -> None:
         self.frame1 = frame1
-        self.body2 = body2
         self.frame2 = frame2
+    
+    def residual(self) -> NDArray:
 
-
-    def residual(self):
         p1 = self.frame1.globalPosition()
         p2 = self.frame2.globalPosition()
-        return p2 - p1
 
-        
-    
+        disp_residual = p2 - p1
 
-class CartesianJoint:
+        return disp_residual.flatten()
 
-    def __init__(self, body1: Body, frame1: Frame, body2: Body, frame2: Frame) -> None:
-        self.body1 = body1
+
+class RevoluteJoint:
+
+    def __init__(self, frame1, frame2, AoR: NDArray | list) -> None:
         self.frame1 = frame1
-        self.body2 = body2
         self.frame2 = frame2
+        self.AoR = np.asarray(AoR, dtype=float)
 
     def residual(self) -> NDArray:
         p1 = self.frame1.globalPosition()
         p2 = self.frame2.globalPosition()
 
-        return np.array([p2[2] - p1[2]]) # global z axis is locked
+        body1 = self.frame1.body
+        body2 = self.frame2.body
+
+        q1 = body1.q
+        q2 = body2.q
+
+        disp_residual = (p2 - p1).flatten()
+
+        rot_residual = np.array([
+            q1[1]/self.AoR[0] - q1[2]/self.AoR[1], 
+            q1[2]/self.AoR[1] - q1[3]/self.AoR[2], 
+            q1[1]/self.AoR[0] - q1[3]/self.AoR[3],
+            q2[1]/self.AoR[0] - q2[2]/self.AoR[1], 
+            q2[2]/self.AoR[1] - q2[3]/self.AoR[2], 
+            q2[1]/self.AoR[0] - q2[3]/self.AoR[3],
+        ])
+
+        return np.append(disp_residual, rot_residual).flatten()
+
+
+# WIP:
+# class CartesianJoint:
+
+#     def __init__(self, frame1: Frame, frame2: Frame, fixedAxis= NDArray | list) -> None:
+#         self.frame1 = frame1
+#         self.frame2 = frame2
+#         self.fixedAxis = fixedAxis
+
+#     def residual(self) -> NDArray:
+#         p1 = self.frame1.globalPosition()
+#         p2 = self.frame2.globalPosition()
+
+#         disp_residual = 
+
+#         return np.array([p2[2] - p1[2]]).flatten() # global z axis is locked
+
+
+#%%
+# Multibody System Class
 
 class MultibodySystem:
     """
@@ -119,7 +140,7 @@ class MultibodySystem:
     def pack(self):
         x=[]
         for body in self.bodies:
-            if body.fixed:
+            if body.free == False:
                 continue
             x.extend(body.r)
             x.extend(body.q)
@@ -128,7 +149,7 @@ class MultibodySystem:
     def unpack(self,x):
         idx = 0
         for body in self.bodies:
-            if body.fixed:
+            if body.free == False:
                 continue
             body.r = x[idx:idx+3]
             idx +=3
@@ -144,23 +165,6 @@ class MultibodySystem:
             Phi.append(joint.residual())
 
         for body in self.bodies:
-            Phi.append(np.array([
-                np.dot(body.q, body.q) - 1
-            ]))
+            Phi.append(body.residual())
 
         return np.concatenate(Phi)
-    
-    def jacobian(self):
-        pass
-
-    # def buildConstraints(self):
-
-    #     # Loop through each body
-    #     for i in range(len(self.bodies)):
-
-    #         # Loop through each point in each body
-    #         for j in range(len(self.bodies[i])):
-                
-
-    # def residuals(self):
-    #     return np.array([c.residual() for c in self.constraints])

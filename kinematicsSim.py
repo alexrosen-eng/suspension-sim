@@ -24,7 +24,7 @@ def buildSuspension():
 
     # Define the bodies
     world = Body(
-        name="world"
+        name="world", fixed=True
     )
     world.addFrame([Frame([0,0,0]),
                     world_UCA_outboard])
@@ -68,7 +68,6 @@ def apply_motion(sys,step):
 
 def kinematicsSim(sys, n_steps):
 
-    z_motion = 5
     x0 = sys.pack()
     hist = [x0]
 
